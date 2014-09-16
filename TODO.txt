@@ -1,9 +1,0 @@
-Check basis info
-Add how to manage link flag in DevC
-Check make file before clean compile in linux
-TestRUN script
-- Test differenct cases of xyz input file
-- Test RHF calculation with different atoms
-
-
-
