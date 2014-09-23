@@ -20,6 +20,19 @@
 //
 // LAPACK prototype
 //
+void dspgvx_(
+	long int * ITYPE, char * JOBZ, char * RANGE, char * UPLO, // what to compute
+	long int * N,                                             // dimension
+	double * AP, double * BP,                                 // input matrices
+	double * VL, double * VU, long int * IL, long int * IU,   // eigen range
+	double * ABSTOL,                                          // precision
+	long int * M,                            // output number of eigen found
+	double * W, double * Z, long int * LDZ,  // output eigen value/vectors
+	double * WORK,                           // double working space
+	long int * IWORK,                        // integer working space
+	long int * IFAIL,                        // reported failed eigen
+	long int * INFO);                        // exit status
+
 void dspgvd_(
 	long int * ITYPE, char * JOBZ, char * UPLO, // what to compute
 	long int * N,                               // dimension
@@ -156,6 +169,130 @@ int gen_sym_eigen(
 	free(Z);
 	free(WORK);
 	free(IWORK);
+
+	// return TRUE on success
+	return 1;
+}
+
+
+//
+// gen_sym_SomeEigen: compute some of eigen vector and eigen values of
+// symmetrix matrix. It solves generalize eigen value problem 
+// Ac=eSc where A and S is symmetric matrix
+//
+//  Jan 16, 2014 - Teepanis Chachiyo
+//		Bug fix, M needs to be set because sometimes it is not set by 
+//		the subroutine
+//
+//	Jan 15, 2014 - Teepanis Chachiyo
+//		Adpated from gen_sym_eigen
+//
+int gen_sym_SomeEigen(
+	int nDim,                           // array dimension
+	int nEigen,                         // number of eigen value requested
+	const double *A, const double *S,   // input A and S
+	double *e, double *C){              // output value and vector
+
+	int i,j,k;   // looping 
+
+	//
+	// LAPACK dspgvx_ variables
+	//
+	long int ITYPE=1;     // A*x = (lambda)*B*x
+	char     JOBZ='V';    // compute eigenvalues and vectors
+	char     RANGE='I';   // compute range of eigen value within index range
+	char     UPLO='L';    // upper triangle of A and B are stored
+	long int N=nDim;      // dimension of matrices A and B
+	double  *AP;          // upper triangle matrix A
+	double  *BP;          // upper triangle matrix B
+	double VL, VU;        // lower and upper bound of eigenvalue
+	long int IL=1;        // lower bound of eigen index
+	long int IU=nEigen;   // upper bound of eigen index
+	double ABSTOL=1.0E-8; // accuracy
+	long int M=nDim;      // number of eigen returned
+	double  *W;           // output eigen value
+	double  *Z;           // output eigen vectors
+	long int LDZ=nDim;    // dimension of matrix
+	double  *WORK;        // working array size 8*N
+	long int *IWORK;      // array dimension 5*N
+	long int *IFAIL;      // array dimension N
+	long int INFO=0;      // exit status
+
+	// sanity check
+	if(nDim < 1){
+		printf("gen_sym_eigen: Error - Invalid dimension range\n");
+		exit(-1);
+	}
+
+	// allocate memory
+	AP     = calloc(N*(N+1)/2, sizeof(double));
+	BP     = calloc(N*(N+1)/2, sizeof(double));
+	W      = calloc(N,         sizeof(double));
+	Z      = calloc(LDZ*N,     sizeof(double));
+	WORK   = calloc(8*N,       sizeof(double));
+	IWORK  = calloc(5*N,       sizeof(long int));
+	IFAIL  = calloc(N,         sizeof(long int));
+
+	// read lower triangle array A
+	// Important!!!!
+	// According to LAPACK document, it should be
+	// upper. But from emprical experiment, you really
+	// need to enter the matrix as lower triangle
+	// - Teepanis Chachiyo Dec 23, 2007
+	k = 0;
+	for(i=0; i < N; i++)
+		for(j=i; j < N; j++){
+			AP[k] = A[i*N+j];
+			k++;
+		}
+
+	// read lower triangle array B
+	k = 0;
+	for(i=0; i < N; i++)
+		for(j=i; j < N; j++){
+			BP[k] = S[i*N+j];
+			k++;
+		}
+
+	dspgvx_(&ITYPE, &JOBZ, &RANGE, &UPLO, &N, 
+	        AP, BP,
+	        &VL, &VU, &IL, &IU,
+	        &ABSTOL,
+	        &M,
+	        W, Z, &LDZ,
+	        WORK, IWORK, IFAIL,
+	        &INFO);
+
+	// 
+	// Linux version of lapack seems to have problem with this if I do not set
+	// the value of M prior to calling the function. But the WindowsXP version
+	// works fine. (Teepanis Jan 16, 2014)
+	if(M != nEigen){
+		printf("gen_sym_SomeEigen: Error - LAPACK subroutine failed to converge (M=%ld)\n", M);
+		exit(EXIT_FAILURE);
+	}
+
+	if(INFO!=0){
+		printf("gen_sym_SomeEigen: Error - LAPACK subroutine returns error %ld\n"
+		       , INFO);
+		exit(EXIT_FAILURE);
+	}	
+
+	for(i=0; i < N; i++)
+		e[i] = W[i];
+
+	for(i=0; i < N; i++)
+		for(j=0; j < N; j++)
+			C[i*N+j] = Z[i*N+j];
+
+	// clean up memory
+	free(AP);
+	free(BP);
+	free(W);
+	free(Z);
+	free(WORK);
+	free(IWORK);
+	free(IFAIL);
 
 	// return TRUE on success
 	return 1;

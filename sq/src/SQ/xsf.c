@@ -60,7 +60,10 @@
 //      - Change file name to 'volume.xsf'
 //      - Adjust the code to coincide with the new struct option_t
 //      - Compute the entire xy-plane at a time
-//  
+//
+// Jan 16, 2014 - Teepanis Chachiyo
+//		- Handle the whicMO index in the option.c instead of here
+//
 void xsfden(int nBasis,               // number of basis function
             struct GTOBasis_t * gto,  // pointer to basis set information
             struct Molecule_t * mol,  // pointer to molecular structure
@@ -253,9 +256,9 @@ void xsfden(int nBasis,               // number of basis function
 		for(k=0; k<nz; k++){
 			for(j=0; j<ny; j++)
 			for(i=0; i<nx; i++){
-				value = uhf_mo(nBasis,gto,CA,option->outWhichMO-1,(xmin+dx*i)*ANGSTROM2BOHR,
-							                                      (ymin+dy*j)*ANGSTROM2BOHR,
-							                                      (zmin+dz*k)*ANGSTROM2BOHR);
+				value = uhf_mo(nBasis,gto,CA,option->outWhichMO,(xmin+dx*i)*ANGSTROM2BOHR,
+							                                    (ymin+dy*j)*ANGSTROM2BOHR,
+							                                    (zmin+dz*k)*ANGSTROM2BOHR);
 				fprintf(fd, "%20.8E", value);
 			}
 			fprintf(fd, "\n");
@@ -266,9 +269,9 @@ void xsfden(int nBasis,               // number of basis function
 		for(k=0; k<nz; k++){
 			for(j=0; j<ny; j++)
 			for(i=0; i<nx; i++){
-				value = uhf_mo(nBasis,gto,CB,option->outWhichMO-1,(xmin+dx*i)*ANGSTROM2BOHR,
-							                                      (ymin+dy*j)*ANGSTROM2BOHR,
-							                                      (zmin+dz*k)*ANGSTROM2BOHR);
+				value = uhf_mo(nBasis,gto,CB,option->outWhichMO,(xmin+dx*i)*ANGSTROM2BOHR,
+							                                    (ymin+dy*j)*ANGSTROM2BOHR,
+							                                    (zmin+dz*k)*ANGSTROM2BOHR);
 				fprintf(fd, "%20.8E", value);
 			}
 			fprintf(fd, "\n");

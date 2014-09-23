@@ -176,7 +176,7 @@ double runGaussian(
 // minimum-energy crossing points (MECPs) in spin-forbidden transitions and 
 // nonadiabatic reactions." The Journal of chemical physics 123 (2005): 094711.
 //
-// ***Note the typo in the paper:the second term should have been a minus sign
+// ***Note the typo in the paper:the last term should have been a minus sign
 //
 //
 //                      T               T

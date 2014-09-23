@@ -21,6 +21,15 @@
 
 void uhf_getDMatrix(int nBasis, int nOcc, double *C, double *P);
 
+void uhf_getGMatrix(
+	int nBasis,
+	const struct GTOBasis_t *gto,
+	const double *Schwarz,
+	double cutoff,
+	const double *PA, const double *PB,
+	double *GA, double *GB,
+	struct option_t *opt);
+
 double uhf_rho(int nBasis,              // number of basis function
                struct GTOBasis_t *gto,  // function structure
                double *PA, double *PB,  // density matrix

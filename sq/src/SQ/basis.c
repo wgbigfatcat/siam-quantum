@@ -307,6 +307,9 @@ void print_BasisSetCode(int nSet, struct GTOBasisSet_t *dbSet){
 // Feb 28, 2008 - Teepanis Chachiyo
 //     Finalize
 //
+// Dec 24, 2014 - Teepanis Chachiyo
+//		Handle character 'D' in scientific format such as 1.0D-2
+//
 #define MAX_BASIS_PER_FILE 20000
 struct GTOBasisSet_t *read_GAMESS_BasisSet(
 	FILE *inFile,     // input file pointer
@@ -371,20 +374,66 @@ struct GTOBasisSet_t *read_GAMESS_BasisSet(
 
 				// special for L: both coefficients at the same time
 				if(strcmp(keyword,"L")==0){
-					if(fscanf(inFile,"%*d %lf %lf %lf",bas_exp+i,
-					                                   bas_coef_a+i,
-					                                   bas_coef_b+i)!=3){
+					// read string into buffer for pre-processing
+					char str1[1024], str2[1024], str3[1024];
+					if(fscanf(inFile,"%*d %s %s %s",str1,str2,str3)!=3){
 						printf("read_GAMESS_BasisSet - "
 					               "Error: Reading coefficient\n");
 						exit(EXIT_FAILURE);
 					}
-				}else
-				// process normal orbitals
-				if(fscanf(inFile,"%*d %lf %lf",bas_exp+i,
-				                               bas_coef_a+i)!=2){
-					printf("read_GAMESS_BasisSet - "
-				               "Error: Reading coefficient\n");
-					exit(EXIT_FAILURE);
+					// convert character D --> E if exists
+					int n;
+					for(n=0; n<strlen(str1); n++) if(str1[n]=='D') str1[n]='E';
+					for(n=0; n<strlen(str2); n++) if(str2[n]=='D') str2[n]='E';
+					for(n=0; n<strlen(str3); n++) if(str3[n]=='D') str3[n]='E';
+					// convert string to double
+					bas_exp   [i] = strtod(str1,NULL);
+					bas_coef_a[i] = strtod(str2,NULL);
+					bas_coef_b[i] = strtod(str3,NULL);
+					// validate range
+					if(bas_exp[i] <= 0.0 || bas_coef_a[i] == 0.0 || bas_coef_b[i] == 0.0){
+						printf("read_GAMESS_BasisSet - "
+					               "Error: Reading parsing coefficient\n");
+						exit(EXIT_FAILURE);
+					}
+
+					//if(fscanf(inFile,"%*d %lf %lf %lf",bas_exp+i,
+					//                                   bas_coef_a+i,
+					//                                   bas_coef_b+i)!=3){
+					//	printf("read_GAMESS_BasisSet - "
+					//               "Error: Reading coefficient\n");
+					//	exit(EXIT_FAILURE);
+					//}
+				}else{
+					// process normal orbitals
+
+					// read string into buffer for pre-processing
+					char str1[1024], str2[1024];
+					if(fscanf(inFile,"%*d %s %s",str1,str2)!=2){
+						printf("read_GAMESS_BasisSet - "
+					               "Error: Reading coefficient\n");
+						exit(EXIT_FAILURE);
+					}
+					// convert character D --> E if exists
+					int n;
+					for(n=0; n<strlen(str1); n++) if(str1[n]=='D') str1[n]='E';
+					for(n=0; n<strlen(str2); n++) if(str2[n]=='D') str2[n]='E';
+					// convert string to double
+					bas_exp   [i] = strtod(str1,NULL);
+					bas_coef_a[i] = strtod(str2,NULL);
+					// validate range
+					if(bas_exp[i] <= 0.0 || bas_coef_a[i] == 0.0){
+						printf("read_GAMESS_BasisSet - "
+					               "Error: Reading parsing coefficient\n");
+						exit(EXIT_FAILURE);
+					}
+
+					//if(fscanf(inFile,"%*d %lf %lf",bas_exp+i,
+					//                               bas_coef_a+i)!=2){
+					//	printf("read_GAMESS_BasisSet - "
+					//               "Error: Reading coefficient\n");
+					//	exit(EXIT_FAILURE);
+					//}
 				}
 			}
 

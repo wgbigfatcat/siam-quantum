@@ -90,8 +90,8 @@ void option_help(){
 	"Volume Output:                                           \n"
 	"-DENSITY       Print electron density  volume information\n"
 	"-POTENTIAL     Print electric potential volume information\n"
-	"-MOALPHA=INT   Print alpha spin molecular orbital volume info\n"
-	"-MOBETA=INT    Print beta spin molecular orbital volume info\n"
+	"-MOUP=INT      Print spin up mo. volume info (index starts at 1)\n"
+	"-MODN=INT      Print spin dn mo. volume info (index starts at 1)\n"
 	"-VOLCUT=REAL   Set accuracy for computing volume info (default=1.0E-4)\n"
 	"-XSF           Volume info. will be in XSF  format to 'volume.xsf'\n"
 	"-CUBE          Volume info. will be in CUBE format to 'volume.cube'\n"
@@ -161,6 +161,9 @@ void option_help(){
 //
 // March 17, 2013 - Teepanis Chachiyo
 //  Add MECP
+//
+// Jan 16, 2014 - Teepanis Chachiyo
+//	Handle whichMO index (which the users think that the index start at 1)
 //
 void parse_option(struct option_t *opt, int argc, char *argv[]){
 
@@ -259,22 +262,28 @@ void parse_option(struct option_t *opt, int argc, char *argv[]){
 			opt->outVolumeType = VOLUME_POTENTIAL;
 			continue;
 		}
-		if(strncmp(argv[i],"-MOALPHA=",9)==0){
+		if(strncmp(argv[i],"-MOUP=",6)==0){
 			if(opt->outVolumeType != VOLUME_NONE){
 				printf("parse_option - error multiple volume types requested\n");
 				exit(-1);
 			}
 			opt->outVolumeType = VOLUME_MO_ALPHA;
-			opt->outWhichMO = atoi(argv[i]+9);
+			opt->outWhichMO = atoi(argv[i]+6);
+
+			// users think that the index starts at 1
+			opt->outWhichMO = opt->outWhichMO - 1;
 			continue;
 		}
-		if(strncmp(argv[i],"-MOBETA=",8)==0){
+		if(strncmp(argv[i],"-MODN=",6)==0){
 			if(opt->outVolumeType != VOLUME_NONE){
 				printf("parse_option - error multiple volume types requested\n");
 				exit(-1);
 			}
 			opt->outVolumeType = VOLUME_MO_BETA;
-			opt->outWhichMO = atoi(argv[i]+8);
+			opt->outWhichMO = atoi(argv[i]+6);
+
+			// users think that the index starts at 1
+			opt->outWhichMO = opt->outWhichMO - 1;
 			continue;
 		}
 		if(strncmp(argv[i],"-VOLCUT=",8)==0){

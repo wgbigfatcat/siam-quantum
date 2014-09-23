@@ -21,11 +21,11 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-O2" />
-					<Add option="-Wall" />
+					<Add option="-Wall -O3 -msse2 -funroll-loops" />
 				</Compiler>
 				<Linker>
-					<Add option="-s" />
+					<Add library="./blas_win32.dll" />
+					<Add library="./lapack_win32.dll" />
 				</Linker>
 			</Target>
 		</Build>

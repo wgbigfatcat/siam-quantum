@@ -30,14 +30,17 @@
 
 // normalizeC : normalized eigen vector 
 //
+// Jan 15, 2014 - Teepanis Chachiyo
+//	Can select how many orbital to normalize
+//
 // 2008 - Teepanis Chachiyo
 // 	Initial implementation
 //
-static void normalizeC(int nBasis, double *S, double *C){
+static void normalizeC(int nBasis, int nOcc, double *S, double *C){
 	double sum;
 	int i,j,k;
 
-	for(k=0; k < nBasis; k++){
+	for(k=0; k < nOcc; k++){
 		sum = 0.0;
 		for(i=0; i < nBasis; i++)
 			for(j=0; j < nBasis; j++)
@@ -79,6 +82,9 @@ void uhf_getDMatrix(int nBasis, int nOcc, double *C, double *P){
 
 // uhf_getGMatrix : compute G matrix element for both alpha and beta spin
 //
+// Jan 16, 2014 - Teepanis Chachiyo
+//	Not using static in the declaration anymore
+//
 // Mar 6, 2013 - Teepanis Chachiyo
 //  Use parallel version
 //
@@ -91,12 +97,12 @@ void uhf_getDMatrix(int nBasis, int nOcc, double *C, double *P){
 // 2008 - Teepanis Chachiyo
 // 	Initial implementation
 //
-static void uhf_getGMatrix(
+void uhf_getGMatrix(
 	int nBasis,
-	struct GTOBasis_t *gto,
-	double *Schwarz,
+	const struct GTOBasis_t *gto,
+	const double *Schwarz,
 	double cutoff,
-	double *PA, double *PB,
+	const double *PA, const double *PB,
 	double *GA, double *GB,
 	struct option_t *opt){
 
@@ -740,6 +746,11 @@ void uhf_efield(int nBasis,                          // number of basis function
 // Mar 19, 2013 - Teepanis Chachiyo
 //     Revamp convergence checking
 //
+// Jan 16, 2014 - Teepanis Chachiyo
+//		Call someEigen instead of full spectrum of eigen value during
+//		iterations. But still need to do full at the last step because
+//		it is needed for post-scf
+//
 double uhf(
 	int nBasis,              // number of basis functions
 	struct GTOBasis_t * gto, // pointer to function structure
@@ -894,8 +905,8 @@ if(P==NULL){                                             \
 		printf("Diagonalizing H for initial density matrix ...\n");
 		gen_sym_eigen(nBasis, H, S, eA, CA);
 		gen_sym_eigen(nBasis, H, S, eB, CB);
-		normalizeC(nBasis, S, CA);
-		normalizeC(nBasis, S, CB);
+		normalizeC(nBasis, nEA, S, CA);
+		normalizeC(nBasis, nEB, S, CB);
 		uhf_getDMatrix(nBasis, nEA, CA, PA);
 		uhf_getDMatrix(nBasis, nEB, CB, PB);
 	}
@@ -927,8 +938,8 @@ if(P==NULL){                                             \
 		fflush(stdout);
 		printf("Read orbital from checkpoint for initial density matrix ...\n");
 		guess_checkpoint_orbital(nBasis, gto, mol, opt, S, CA, CB);
-		normalizeC(nBasis, S, CA);
-		normalizeC(nBasis, S, CB);
+		normalizeC(nBasis, nEA, S, CA);
+		normalizeC(nBasis, nEB, S, CB);
 		uhf_getDMatrix(nBasis, nEA, CA, PA);
 		uhf_getDMatrix(nBasis, nEB, CB, PB);
 	}
@@ -1091,10 +1102,10 @@ if(P==NULL){                                             \
 		}
 
 		// solve generalized eigen value problem and normalize orbital
-		gen_sym_eigen(nBasis, FA, S, eA, CA);
-		gen_sym_eigen(nBasis, FB, S, eB, CB);
-		normalizeC(nBasis, S, CA);
-		normalizeC(nBasis, S, CB);
+		gen_sym_SomeEigen(nBasis, nEA, FA, S, eA, CA);
+		gen_sym_SomeEigen(nBasis, nEB, FB, S, eB, CB);
+		normalizeC(nBasis, nEA, S, CA);
+		normalizeC(nBasis, nEB, S, CB);
 
 		// get new P matrix
 		uhf_getDMatrix(nBasis, nEA, CA, PA);
@@ -1180,6 +1191,12 @@ if(P==NULL){                                             \
 		printf("Done SCF Loop Total Energy is %20.8f Hartrees\n", Etot);
 	}
 	fflush(stdout);
+
+	// re-calculate full eigen vector spectrum
+	gen_sym_eigen(nBasis, FA, S, eA, CA);
+	gen_sym_eigen(nBasis, FB, S, eB, CB);
+	normalizeC(nBasis, nBasis, S, CA);
+	normalizeC(nBasis, nBasis, S, CB);
 
 	// save density matrix if requested
 	if(opt->saveDMatrix){

@@ -19,6 +19,12 @@ int gen_sym_eigen(
 	const double *A, const double *S,   // input A and S
 	double *e, double *C);              // output value and vector
 
+int gen_sym_SomeEigen(
+	int nDim,                           // array dimension
+	int nEigen,                         // number of eigen value requested
+	const double *A, const double *S,   // input A and S
+	double *e, double *C);              // output value and vector
+
 int linear_solver(int nRow,         // number of row
                   int nCol,         // number column
                   const double *A,  // input matrix A
