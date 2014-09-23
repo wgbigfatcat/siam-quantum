@@ -88,4 +88,40 @@ double mp2_rhf_semi_direct_aqij(
 	const struct Molecule_t *mol,  // molecule information
 	const struct option_t *opt);   // global options
 
+double mp2_uhf_direct(
+	int nBasis,                    // number of basis function
+	int nEA,                       // number of occupied spin up orbitals
+	int nEB,                       // number of occupied spin dn orbitals
+	const double *eA,              // eigen values
+	const double *eB,              // eigen values
+	const double *CA,              // molecular orbitals
+	const double *CB,              // molecular orbitals
+	const struct GTOBasis_t *gto,  // basis function structure
+	const struct Molecule_t *mol,  // molecule information
+	const struct option_t *opt);   // global options
+
+double mp2_uhf_semi_direct_aqij(
+	int nBasis,                    // number of basis function
+	int nEA,                       // number of occupied spin up orbitals
+	int nEB,                       // number of occupied spin dn orbitals
+	const double *eA,              // eigen values
+	const double *eB,              // eigen values
+	const double *CA,              // molecular orbitals
+	const double *CB,              // molecular orbitals
+	const struct GTOBasis_t *gto,  // basis function structure
+	const struct Molecule_t *mol,  // molecule information
+	const struct option_t *opt);   // global options
+
+double mp2_uhf_aqij(
+	int nBasis,                    // number of basis function
+	int nEA,                       // number of occupied spin up orbitals
+	int nEB,                       // number of occupied spin dn orbitals
+	const double *eA,              // eigen values
+	const double *eB,              // eigen values
+	const double *CA,              // molecular orbitals
+	const double *CB,              // molecular orbitals
+	const struct GTOBasis_t *gto,  // basis function structure
+	const struct Molecule_t *mol,  // molecule information
+	const struct option_t *opt);   // global options
+
 #endif

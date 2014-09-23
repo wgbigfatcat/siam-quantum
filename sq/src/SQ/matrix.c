@@ -3856,11 +3856,12 @@ void GTO_JK_Matrix_Quartet_Parallel(
 	double *eeBankPtr=NULL;               // pointer to current 2e storage
 	static double memCutoff=0.0;          // schwartz cutoff to store in memory
 
-#define ALLOC(array,item,type)                                        \
-array=calloc(item,sizeof(type));                                      \
-if(array==NULL){                                                      \
-	printf("GTO_JK_Matrix_Quartet - error cannot allocate memory\n"); \
-	exit(-1);                                                         \
+#define ALLOC(array,item,type)                                                 \
+array=calloc(item,sizeof(type));                                               \
+if(array==NULL){                                                               \
+	printf("GTO_JK_Matrix_Quartet_Parallel - error cannot allocate memory\n"); \
+	printf("tried to allocate %.1f MB\n",1.0e-6*item*sizeof(type));            \
+	exit(-1);                                                                  \
 }
 
 	// reset call

@@ -29,7 +29,7 @@
 #include "rpc.h"
 #include "mecp.h"
 
-#define VERSION_NUMBER "1.2.8"
+#define VERSION_NUMBER "1.2.9"
 
 // greeting : Printout initial message at the beginning of the
 // program. The message should be related to copyright issue
@@ -47,37 +47,39 @@ static void greeting(FILE *outFile){
 	"                                               \n"
 	"+---------------------------------------------+\n"
 	"|| SQ - Siam Quantum                          |\n"
-	"|| .... by Computational Physics @ KKU Group  |\n"
+	"|| .... by Siam Computational Physics         |\n"
 	"||                                            |\n"
 	"|| Version: %10s                        |\n"
 	"||                                            |\n"
 	"|| Authors:                                   |\n"
+	"||   Teepanis Chachiyo                        |\n"
 	"||   Theerapon Khamla                         |\n"
 	"||   Keerati Maneesai                         |\n"
 	"||   Narong Phutaddauwng                      |\n"
 	"||   Nanta Sophonrat                          |\n"
+	"||   Chutchawan Jaisuk                        |\n"
 	"||   Aniwat Kesorn                            |\n"
-	"||   Teepanis Chachiyo                        |\n"
 	"||                                            |\n"
-	"|| The Department of Physics                  |\n"
-	"|| Faculty of Science, Khon Kaen University.  |\n"
-	"|| Thailand 40002                             |\n"
+	"|| The Department of ...........              |\n"
+	"|| Faculty of ...... , ......... University.  |\n"
+	"|| Thailand                                   |\n"
 	"+---------------------------------------------+\n"
 	"                                               \n"
-	" Copyright (C) 2009,2010,2012,2013 Computational Physics @ KKU Group\n"
+	" Copyright (C) 2009,2010,2012,2013,2014 Siam Computational Physics\n"
 	"                                                       \n"
 	"This program is free software; you can redistribute it and/or modify\n"
 	"it under the terms of the GNU General Public License as published by\n"
 	"the Free Software Foundation; either version 2, or (at your option) \n"
 	"any later version.                                                  \n"
 	"                                                                    \n"
-	"Visit our website at http://www.physics.kku.ac.th/sq                \n"
+	"Visit our website at https://sites.google.com/site/siamquantum/     \n"
 	"or via email siamquantum@yahoo.com                                  \n"
 	"                                                                    \n"
 	"Cite this work as:                                                  \n"
 	"Siam Quantum, Release %s,                                           \n"
-	"T.Khamla, K.Maneesai, N.Phutaddauwng, N.Sophonrat, A. Kesorn, and   \n"
-	"T.Chachiyo, The Department of Physics, Khon Kaen University, 2013.  \n"
+	"T.Chachiyo, T.Khamla, K.Maneesai, N.Phutaddauwng, N.Sophonrat,      \n"
+	"A.Kesorn, and C.Jaisuk, .............. Research Center              \n"
+	"The Department of .......,  .......... University, 2014.  \n"
 	"                                                                    \n"
 	"Begin: %s\n",
 	VERSION_NUMBER, VERSION_NUMBER, time);
@@ -205,10 +207,10 @@ int main(int argc, char *argv[]){
 	}
 
 	// validate restricted mp2
-	if(opt.MP2 && opt.RHF==0){
-		printf("main - error MP2 only supports RHF\n");
-		exit(-1);
-	}
+	//if(opt.MP2 && opt.RHF==0){
+	//	printf("main - error MP2 only supports RHF\n");
+	//	exit(-1);
+	//}
 
 	printf(
 	"                                                             \n"
@@ -325,12 +327,28 @@ int main(int argc, char *argv[]){
 	);
 
 	if(opt.MP2){
+		if(opt.RHF)
 		mp2_rhf_aqij_Parallel(nBasis, get_nEA(mol,opt.multiplicity), eA, CA, gto, mol, &opt);
 		//mp2_rhf_aqij(nBasis, get_nEA(mol,opt.multiplicity), eA, CA, gto, mol, &opt);
 		//mp2_rhf_aqbj(nBasis, get_nEA(mol,opt.multiplicity), eA, CA, gto, mol, &opt);
 		//mp2_rhf_direct(nBasis, get_nEA(mol,opt.multiplicity), eA, CA, gto, mol, &opt);
 		//mp2_rhf_semi_direct_aqbj(nBasis, get_nEA(mol,opt.multiplicity), eA, CA, gto, mol, &opt);
 		//mp2_rhf_semi_direct_aqij(nBasis, get_nEA(mol,opt.multiplicity), eA, CA, gto, mol, &opt);
+		else
+		//mp2_uhf_direct(nBasis,
+		//               get_nEA(mol,opt.multiplicity),
+		//               get_nEB(mol,opt.multiplicity),
+		//               eA, eB, CA, CB, gto, mol, &opt);
+		//mp2_uhf_semi_direct_aqij(nBasis,
+		//               get_nEA(mol,opt.multiplicity),
+		//               get_nEB(mol,opt.multiplicity),
+		//               eA, eB, CA, CB, gto, mol, &opt);
+		mp2_uhf_aqij(nBasis,
+		             get_nEA(mol,opt.multiplicity),
+		             get_nEB(mol,opt.multiplicity),
+		             eA, eB, CA, CB, gto, mol, &opt);
+
+
 	}
 
 	mulliken(nBasis, gto, mol, 
