@@ -1,0 +1,1 @@
+Quantum chemistry program that uses quantum mechanics to determine the total energy and wave function of molecules within the framework of Hartee-Fock and MP2 method. It is very fast and provides research quality results practically identical Gaussian and GAMESS. Source code is well documented suitable for students who want to implement their own algorithms.
